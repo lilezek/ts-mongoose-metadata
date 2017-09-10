@@ -1,0 +1,35 @@
+{
+  "name": "ts-mongoose-metadata",
+  "version": "0.0.1",
+  "description": "Mongoose Schema generator directly from classes with enough metadata provided. ",
+  "main": "lib/index.js",
+  "module": "lib/index",
+  "typings": "lib/index",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lilezek/ts-mongoose-metadata.git"
+  },
+  "keywords": [
+    "typescript",
+    "metadata",
+    "atm",
+    "mongoose",
+    "automatic"
+  ],
+  "author": "Ezequiel Santamaria Navarro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lilezek/ts-mongoose-metadata/issues"
+  },
+  "homepage": "https://github.com/lilezek/ts-mongoose-metadata#readme",
+  "dependencies": {
+    "awesome-metadata": "0.0.3",
+    "mongoose": "^4.11.10"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^4.7.21"
+  }
+}
