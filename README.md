@@ -5,7 +5,7 @@ converts these metadata into a Mongoose Schema.
 
 # Goals
 
-The goal of this project is to an automatic way to map classes to mongo by using mongoose and metadata.
+The goal of this project is to offer an automatic way to map classes to mongo database by using mongoose and metadata from classes.
 
 The actual TypeScript metadata emitted is not powerful enough to do it, so this project depends on atm.    
 
