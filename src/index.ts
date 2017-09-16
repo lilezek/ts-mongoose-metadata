@@ -69,6 +69,14 @@ export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName
     const schemaObject = atmBodyToSchemaConstructor(getAtmBody(theClass));
     // Use here virtuals and hooks.
     const schema = new mongoose.Schema(schemaObject);
+    // Register methods and statics:
+    for (const k in theClass) {
+      if (theClass.hasOwnProperty(k)) {
+        if (typeof (theClass as any)[k] === "function") {
+          schema.statics[k] = (theClass as any)[k];
+        }
+      }
+    }
     if (collname) {
       Reflect.defineMetadata("mongoose-metadata:model", model = mongoose.model(objectName, schema, collname), theClass);
     } else {
