@@ -1,9 +1,30 @@
 import { ETypes, IBody, IClassType, IInterfaceType, IPrimitiveType, IType, IUnionType } from "awesome-metadata";
 import * as mongoose from "mongoose";
 import "reflect-metadata";
+import { IMongooseHook, IMongooseHooks } from "./decorators";
+export * from "./decorators";
+
+// tslint:disable-next-line:no-namespace
+declare global {
+  export namespace Reflect {
+    export function getMetadata<T = any>(key: "mongoose-metadata:model", target: { new(...args: any[]): T }): mongoose.Model<mongoose.Document & T> | undefined;
+  }
+}
 
 function getAtmBody(target: any) {
   return Reflect.getMetadata("atm:body", target) as IBody;
+}
+
+function getRequired(target: any) {
+  return Reflect.getMetadata("mongoose-metadata:mandatory", target);
+}
+
+function getUniques(target: any) {
+  return Reflect.getMetadata("mongoose-metadata:unique", target);
+}
+
+function getVirtuals(target: any) {
+  return Reflect.getMetadata("mongoose-metadata:virtuals", target);
 }
 
 const mapTypes = {
@@ -18,7 +39,7 @@ const mapTypes = {
 
 function atmTypeToSchemaType(type: IClassType | IInterfaceType | IPrimitiveType | IUnionType) {
   if (type.kind === ETypes.CLASS) {
-    return atmBodyToSchemaConstructor(getAtmBody(type.ctor));
+    return atmBodyToSchemaConstructor(type.ctor);
   } else if (type.kind === ETypes.INTERFACE) {
     return Object;
   } else if (type.kind === ETypes.PRIMITIVE) {
@@ -34,47 +55,68 @@ function atmTypeToSchemaType(type: IClassType | IInterfaceType | IPrimitiveType 
   }
 }
 
-function atmBodyToSchemaConstructor(body: IBody) {
-  const schemaObject = {} as any;
+function atmBodyToSchemaConstructor<V>(theClass: { new(...args: any[]): V }): mongoose.SchemaDefinition {
+  const body = getAtmBody(theClass);
+  const virtual = getVirtuals(theClass) || {};
+  const required = getRequired(theClass) || {};
+  const unique = getUniques(theClass) || {};
+
+  const schemaObject = {} as mongoose.SchemaDefinition;
+
   for (const k in body) {
-    const obj = body[k];
-    const type = obj.type;
-    schemaObject[k] = atmTypeToSchemaType(type);
-  }
-  return schemaObject;
-}
-
-// tslint:disable-next-line:no-namespace
-declare global {
-  export namespace Reflect {
-    export function getMetadata<T = any>(key: "mongoose-metadata:virtuals", target: { new(...args: any[]): T }): {[k in keyof T]: boolean } | undefined;
-    export function getMetadata<T = any>(key: "mongoose-metadata:model", target: { new(...args: any[]): T }): mongoose.Model<mongoose.Document & T> | undefined;
-  }
-}
-
-export function virtual<T = any>() {
-  return (target: T, key: keyof T) => {
-    let virtuals = Reflect.getMetadata<T>("mongoose-metadata:virtuals", target.constructor as any);
-    if (!virtuals) {
-      virtuals = {} as {[k in keyof T]: boolean };
-      Reflect.defineMetadata("mongoose-metadata:virtuals", virtuals, target.constructor);
+    // Ignore virtuals. Virtuals must not persist.
+    if (!(k in virtual)) {
+      const obj = body[k];
+      const type = obj.type;
+      schemaObject[k] = { type: atmTypeToSchemaType(type) };
+      if (k in unique) {
+        schemaObject[k].index = { unique: true };
+      }
+      if (k in required) {
+        schemaObject[k].required = true;
+      }
     }
-    virtuals[key] = true;
-  };
+  }
+
+  return schemaObject;
 }
 
 export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName: string, collname?: string) {
   let model = Reflect.getMetadata<V>("mongoose-metadata:model", theClass);
   if (!model) {
-    const schemaObject = atmBodyToSchemaConstructor(getAtmBody(theClass));
-    // Use here virtuals and hooks.
+    const schemaObject = atmBodyToSchemaConstructor(theClass);
+    const hooks = Reflect.getMetadata<V>("mongoose-metadata:hooks", theClass);
     const schema = new mongoose.Schema(schemaObject);
-    // Register methods and statics:
+    // Register hooks:
+    if (hooks) {
+      for (const k in hooks) {
+        const hook = hooks[k as keyof IMongooseHooks] as IMongooseHook;
+        if (hook.post) {
+          hook.post.forEach((p) => {
+            schema.post(k, p);
+          });
+        }
+        if (hook.pre) {
+          hook.pre.forEach((p) => {
+            schema.pre(k, p);
+          });
+        }
+      }
+    }
+
+    // Register statics:
     for (const k in theClass) {
       if (theClass.hasOwnProperty(k)) {
         if (typeof (theClass as any)[k] === "function") {
           schema.statics[k] = (theClass as any)[k];
         }
+      }
+    }
+
+    // Register methods:
+    for (const k in theClass.prototype) {
+      if (k !== "constructor" && typeof theClass.prototype[k] === "function") {
+        schema.methods[k] = theClass.prototype[k];
       }
     }
     if (collname) {
@@ -89,5 +131,5 @@ export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName
 }
 
 export function classToSchema<V>(theClass: { new(...args: any[]): V }) {
-  return new mongoose.Schema(atmBodyToSchemaConstructor(getAtmBody(theClass)));
+  return new mongoose.Schema(atmBodyToSchemaConstructor(theClass));
 }
