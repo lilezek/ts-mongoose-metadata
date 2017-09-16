@@ -13,11 +13,11 @@ The actual TypeScript metadata emitted is not powerful enough to do it, so this 
 
 * [x] Class body to mongoose schema.
   * [x] Every member is mapped into the mongoose schema.
-  * [ ] Mandatory members are marked as mandatory.
+  * [x] Non optional members are marked as required.
 * [x] @virtual decorator.
   * [x] If a member is @virtual it won't be mapped into the Schema.
-* [ ] Decorators for mongoose hooks (pre/post save, pre/post load...).
-  * Not implemented yet.
+* [x] Decorators for mongoose hooks (pre/post save, pre/post load...).
+  * [x] pre/post hooks for save, init, validate, and remove
 * [ ] Interface body to mongoose schema.
   * Not supported because atm does not support interfaces yet.
 
@@ -52,17 +52,14 @@ export class UserClass {
   @virtual()
   private logger: Logger;
 
-  // TODO: @preSave not implemented yet 
-  // @preSave()
+  @preSave()
   public preSave() {
     if (!this.created) {
       this.created = new Date();
     }
   }
 
-  // 
-  // @postLoad()
-  // @postCreate()
+  @postInit()
   public postLoad() {
     this.logger = LOG("User " + this.name);
   }

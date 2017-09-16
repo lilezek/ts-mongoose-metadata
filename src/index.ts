@@ -15,9 +15,9 @@ function getAtmBody(target: any) {
   return Reflect.getMetadata("atm:body", target) as IBody;
 }
 
-function getRequired(target: any) {
-  return Reflect.getMetadata("mongoose-metadata:mandatory", target);
-}
+// function getRequired(target: any) {
+//   return Reflect.getMetadata("mongoose-metadata:mandatory", target);
+// }
 
 function getUniques(target: any) {
   return Reflect.getMetadata("mongoose-metadata:unique", target);
@@ -58,7 +58,7 @@ function atmTypeToSchemaType(type: IClassType | IInterfaceType | IPrimitiveType 
 function atmBodyToSchemaConstructor<V>(theClass: { new(...args: any[]): V }): mongoose.SchemaDefinition {
   const body = getAtmBody(theClass);
   const virtual = getVirtuals(theClass) || {};
-  const required = getRequired(theClass) || {};
+  // const required = getRequired(theClass) || {};
   const unique = getUniques(theClass) || {};
 
   const schemaObject = {} as mongoose.SchemaDefinition;
@@ -72,7 +72,7 @@ function atmBodyToSchemaConstructor<V>(theClass: { new(...args: any[]): V }): mo
       if (k in unique) {
         schemaObject[k].index = { unique: true };
       }
-      if (k in required) {
+      if (!obj.optional) {
         schemaObject[k].required = true;
       }
     }

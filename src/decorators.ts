@@ -148,13 +148,13 @@ export function unique<T = any>() {
   };
 }
 
-export function required<T = any>() {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    let required = Reflect.getMetadata<T>("mongoose-meatadata:required", target.constructor as any);
-    if (!required) {
-      required = {};
-    }
-    required[propertyKey] = true;
-    Reflect.defineMetadata("mongoose-meatadata:required", required, target.constructor);
-  };
-}
+// export function required<T = any>() {
+//   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+//     let required = Reflect.getMetadata<T>("mongoose-meatadata:required", target.constructor as any);
+//     if (!required) {
+//       required = {};
+//     }
+//     required[propertyKey] = true;
+//     Reflect.defineMetadata("mongoose-meatadata:required", required, target.constructor);
+//   };
+// }
