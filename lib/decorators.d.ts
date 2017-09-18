@@ -18,9 +18,6 @@ declare global  {
         function getMetadata<T = any>(key: "mongoose-metadata:hooks", target: {
             new (...args: any[]): T;
         }): IMongooseHooks | undefined;
-        function getMetadata<T = any>(key: "mongoose-metadata:post-create", target: {
-            new (...args: any[]): T;
-        }): any[] | undefined;
     }
 }
 export declare function virtual<T = any>(): (target: T, key: keyof T) => void;
@@ -34,14 +31,16 @@ export interface IMongooseHooks {
     validate?: IMongooseHook;
     save?: IMongooseHook;
     remove?: IMongooseHook;
+    create?: IMongooseHook;
 }
 export declare function preSave<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export declare function postSave<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export declare function preInit<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export declare function postInit<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+export declare function preCreate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+export declare function postCreate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export declare function preValidate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export declare function postValidate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export declare function preRemove<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export declare function postRemove<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function postCreate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 export {};

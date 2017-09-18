@@ -6,7 +6,6 @@ declare global {
     export function getMetadata<T = any>(key: "mongoose-meatadata:required", target: { new(...args: any[]): T }): {[k in keyof T]?: boolean } | undefined;
     export function getMetadata<T = any>(key: "mongoose-metadata:unique", target: { new(...args: any[]): T }): {[k in keyof T]?: boolean } | undefined;
     export function getMetadata<T = any>(key: "mongoose-metadata:hooks", target: { new(...args: any[]): T }): IMongooseHooks | undefined;
-    export function getMetadata<T = any>(key: "mongoose-metadata:post-create", target: { new(...args: any[]): T }): any[] | undefined;
     // tslint:enable:unified-signatures
   }
 }
@@ -24,12 +23,12 @@ export function virtual<T = any>() {
 
 export function unique<T = any>() {
   return (target: any, propertyKey: string) => {
-    let unique = Reflect.getMetadata<T>("mongoose-metadata:unique", target.constructor as any);
-    if (!unique) {
-      unique = {};
+    let uniq = Reflect.getMetadata<T>("mongoose-metadata:unique", target.constructor as any);
+    if (!uniq) {
+      uniq = {};
     }
-    unique[propertyKey] = true;
-    Reflect.defineMetadata("mongoose-metadata:unique", unique, target.constructor);
+    uniq[propertyKey] = true;
+    Reflect.defineMetadata("mongoose-metadata:unique", uniq, target.constructor);
   };
 }
 
@@ -43,6 +42,7 @@ export interface IMongooseHooks {
   validate?: IMongooseHook;
   save?: IMongooseHook;
   remove?: IMongooseHook;
+  create?: IMongooseHook;
 }
 
 export function preSave<T = any>() {
@@ -97,6 +97,32 @@ export function postInit<T = any>() {
   };
 }
 
+export function preCreate<T = any>() {
+  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    let hooks = Reflect.getMetadata<T>("mongoose-metadata:hooks", target.constructor as any);
+    if (!hooks) {
+      hooks = {};
+    }
+    hooks.create = hooks.create || {};
+    hooks.create.pre = hooks.create.pre || [];
+    hooks.create.pre.push(target[propertyKey]);
+    Reflect.defineMetadata("mongoose-metadata:hooks", hooks, target.constructor);
+  };
+}
+
+export function postCreate<T = any>() {
+  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    let hooks = Reflect.getMetadata<T>("mongoose-metadata:hooks", target.constructor as any);
+    if (!hooks) {
+      hooks = {};
+    }
+    hooks.create = hooks.create || {};
+    hooks.create.post = hooks.create.post || [];
+    hooks.create.post.push(target[propertyKey]);
+    Reflect.defineMetadata("mongoose-metadata:hooks", hooks, target.constructor);
+  };
+}
+
 export function preValidate<T = any>() {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     let hooks = Reflect.getMetadata<T>("mongoose-metadata:hooks", target.constructor as any);
@@ -146,17 +172,6 @@ export function postRemove<T = any>() {
     hooks.remove.post = hooks.remove.post || [];
     hooks.remove.post.push(target[propertyKey]);
     Reflect.defineMetadata("mongoose-metadata:hooks", hooks, target.constructor);
-  };
-}
-
-export function postCreate<T = any>() {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    let hooks = Reflect.getMetadata<T>("mongoose-metadata:post-create", target.constructor as any);
-    if (!hooks) {
-      hooks = [];
-    }
-    hooks.push(target[propertyKey]);
-    Reflect.defineMetadata("mongoose-metadata:post-create", hooks, target.constructor);
   };
 }
 

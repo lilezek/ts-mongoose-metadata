@@ -90,16 +90,19 @@ export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName
     // Register hooks:
     if (hooks) {
       for (const k in hooks) {
-        const hook = hooks[k as keyof IMongooseHooks] as IMongooseHook;
-        if (hook.post) {
-          hook.post.forEach((p) => {
-            schema.post(k, p);
-          });
-        }
-        if (hook.pre) {
-          hook.pre.forEach((p) => {
-            schema.pre(k, p);
-          });
+        // Skip create hook
+        if (k !== "create") {
+          const hook = hooks[k as keyof IMongooseHooks] as IMongooseHook;
+          if (hook.post) {
+            hook.post.forEach((p) => {
+              schema.post(k, p);
+            });
+          }
+          if (hook.pre) {
+            hook.pre.forEach((p) => {
+              schema.pre(k, p);
+            });
+          }
         }
       }
     }
@@ -124,10 +127,25 @@ export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName
     } else {
       Reflect.defineMetadata("mongoose-metadata:model", model = mongoose.model(objectName, schema), theClass);
     }
+    return ((parent) => {
+      function Child(this: any, a?: any, b?: any) {
+        if (hooks && hooks.create && hooks.create.pre) {
+          hooks.create.pre.forEach((f) => f.call(this, a, b));
+        }
+        parent.call(this, a, b);
+        if (hooks && hooks.create && hooks.create.post) {
+          hooks.create.post.forEach((f) => f.call(this, a, b));
+        }
+      }
+
+      Child.prototype = Object.create(parent.prototype);
+      Child.prototype.constructor = Child;
+
+      return Child as any;
+    })(model) as mongoose.Model<mongoose.Document & V>;
   } else {
     throw new Error("This class had already registed a model");
   }
-  return model;
 }
 
 export function classToSchema<V>(theClass: { new(...args: any[]): V }) {

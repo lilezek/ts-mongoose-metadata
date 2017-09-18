@@ -18,6 +18,7 @@ The actual TypeScript metadata emitted is not powerful enough to do it, so this 
   * [x] If a member is @virtual it won't be mapped into the Schema.
 * [x] Decorators for mongoose hooks (pre/post save, pre/post load...).
   * [x] pre/post hooks for save, init, validate, and remove
+  * [x] pre/post create hook, triggered before/after doing `new Model({...})`.
 * [ ] Interface body to mongoose schema.
   * Not supported because atm does not support interfaces yet.
 
