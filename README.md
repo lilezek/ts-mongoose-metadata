@@ -53,14 +53,15 @@ export class UserClass {
   @virtual()
   private logger: Logger;
 
-  @preSave()
-  public preSave() {
+  @preValidate()
+  public preValidate() {
     if (!this.created) {
       this.created = new Date();
     }
   }
 
   @postInit()
+  @postCreate()
   public postLoad() {
     this.logger = LOG("User " + this.name);
   }
