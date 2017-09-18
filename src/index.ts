@@ -114,7 +114,7 @@ export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName
     }
 
     // Register methods:
-    for (const k in theClass.prototype) {
+    for (const k of Object.getOwnPropertyNames(theClass.prototype)) {
       if (k !== "constructor" && typeof theClass.prototype[k] === "function") {
         schema.methods[k] = theClass.prototype[k];
       }

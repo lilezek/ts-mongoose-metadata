@@ -6,6 +6,7 @@ declare global {
     export function getMetadata<T = any>(key: "mongoose-meatadata:required", target: { new(...args: any[]): T }): {[k in keyof T]?: boolean } | undefined;
     export function getMetadata<T = any>(key: "mongoose-metadata:unique", target: { new(...args: any[]): T }): {[k in keyof T]?: boolean } | undefined;
     export function getMetadata<T = any>(key: "mongoose-metadata:hooks", target: { new(...args: any[]): T }): IMongooseHooks | undefined;
+    export function getMetadata<T = any>(key: "mongoose-metadata:post-create", target: { new(...args: any[]): T }): any[] | undefined;
     // tslint:enable:unified-signatures
   }
 }
@@ -18,6 +19,17 @@ export function virtual<T = any>() {
       Reflect.defineMetadata("mongoose-metadata:virtuals", virtuals, target.constructor);
     }
     virtuals[key] = true;
+  };
+}
+
+export function unique<T = any>() {
+  return (target: any, propertyKey: string) => {
+    let unique = Reflect.getMetadata<T>("mongoose-metadata:unique", target.constructor as any);
+    if (!unique) {
+      unique = {};
+    }
+    unique[propertyKey] = true;
+    Reflect.defineMetadata("mongoose-metadata:unique", unique, target.constructor);
   };
 }
 
@@ -137,14 +149,14 @@ export function postRemove<T = any>() {
   };
 }
 
-export function unique<T = any>() {
+export function postCreate<T = any>() {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    let unique = Reflect.getMetadata<T>("mongoose-metadata:unique", target.constructor as any);
-    if (!unique) {
-      unique = {};
+    let hooks = Reflect.getMetadata<T>("mongoose-metadata:post-create", target.constructor as any);
+    if (!hooks) {
+      hooks = [];
     }
-    unique[propertyKey] = true;
-    Reflect.defineMetadata("mongoose-metadata:unique", unique, target.constructor);
+    hooks.push(target[propertyKey]);
+    Reflect.defineMetadata("mongoose-metadata:post-create", hooks, target.constructor);
   };
 }
 
