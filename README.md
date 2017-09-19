@@ -54,15 +54,19 @@ export class UserClass {
   private logger: Logger;
 
   @preValidate()
-  public preValidate() {
+  public async preValidate() {
     if (!this.created) {
       this.created = new Date();
     }
   }
 
-  @postInit()
   @postCreate()
-  public postLoad() {
+  public postCreate() {
+    this.logger = LOG("User " + this.name);    
+  }
+
+  @postInit()
+  public async postLoad() {
     this.logger = LOG("User " + this.name);
   }
 

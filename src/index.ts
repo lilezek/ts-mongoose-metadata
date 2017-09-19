@@ -138,7 +138,14 @@ export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName
           hooks.create.post.forEach((f) => f.call(this, a, b));
         }
       }
+      // Copy all static functions:
+      for (const k in parent) {
+        if (parent.hasOwnProperty(k)) {
+          (HookedModel as any)[k] = (parent as any)[k];
+        }
+      }
 
+      (HookedModel as any).__proto__ = (parent as any).__proto__;
       HookedModel.prototype = Object.create(parent.prototype);
       HookedModel.prototype.constructor = HookedModel;
 
