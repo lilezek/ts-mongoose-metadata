@@ -20,8 +20,8 @@ declare global  {
         }): IMongooseHooks | undefined;
     }
 }
-export declare function virtual<T = any>(): (target: T, key: keyof T) => void;
-export declare function unique<T = any>(): (target: any, propertyKey: string) => void;
+export declare function virtual(): <T, K>(target: T, key: K) => void;
+export declare function unique(): <T, K>(target: T, propertyKey: K) => void;
 export interface IMongooseHook {
     pre?: any[];
     post?: any[];
@@ -33,14 +33,14 @@ export interface IMongooseHooks {
     remove?: IMongooseHook;
     create?: IMongooseHook;
 }
-export declare function preSave<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function postSave<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function preInit<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function postInit<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function preCreate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function postCreate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function preValidate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function postValidate<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function preRemove<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
-export declare function postRemove<T = any>(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+export declare function preSave(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
+export declare function postSave(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
+export declare function preInit(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
+export declare function postInit(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
+export declare function preCreate(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => any>) => void;
+export declare function postCreate(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => any>) => void;
+export declare function preValidate(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
+export declare function postValidate(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
+export declare function preRemove(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
+export declare function postRemove(): <T>(target: T, propertyKey: string, descriptor: TypedPropertyDescriptor<(...p: any[]) => Promise<any>>) => void;
 export {};

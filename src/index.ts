@@ -128,20 +128,21 @@ export function classToModel<V>(theClass: { new(...args: any[]): V }, objectName
       Reflect.defineMetadata("mongoose-metadata:model", model = mongoose.model(objectName, schema), theClass);
     }
     return ((parent) => {
-      function Child(this: any, a?: any, b?: any) {
+      function HookedModel(this: any, a?: any, b?: any) {
         if (hooks && hooks.create && hooks.create.pre) {
           hooks.create.pre.forEach((f) => f.call(this, a, b));
         }
+        this.constructor = parent;
         parent.call(this, a, b);
         if (hooks && hooks.create && hooks.create.post) {
           hooks.create.post.forEach((f) => f.call(this, a, b));
         }
       }
 
-      Child.prototype = Object.create(parent.prototype);
-      Child.prototype.constructor = Child;
+      HookedModel.prototype = Object.create(parent.prototype);
+      HookedModel.prototype.constructor = HookedModel;
 
-      return Child as any;
+      return HookedModel as any;
     })(model) as mongoose.Model<mongoose.Document & V>;
   } else {
     throw new Error("This class had already registed a model");

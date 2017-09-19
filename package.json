@@ -1,6 +1,6 @@
 {
   "name": "ts-mongoose-metadata",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "Mongoose Schema generator directly from classes with enough metadata provided. ",
   "main": "lib/index.js",
   "module": "lib/index",
